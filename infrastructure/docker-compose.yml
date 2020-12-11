@@ -1,0 +1,82 @@
+version: "3.7"
+services:
+
+  nginx:
+    restart: always
+    build:
+      context: ./../
+      dockerfile: infrastructure/nginx/Dockerfile
+    ports:
+      - 8081:80
+    volumes:
+      - ./../:/var/www/html/
+    depends_on:
+      - httpd
+      - node
+    networks:
+      - network1
+
+  httpd:
+    restart: always
+    build:
+      context: ./../
+      dockerfile: infrastructure/httpd/Dockerfile
+    volumes:
+      - ./../:/var/www/html/
+    depends_on:
+      - php-fpm
+    networks:
+      - network1
+
+  php-fpm:
+    build:
+      context: ./../
+      dockerfile: infrastructure/php-fpm/Dockerfile
+    restart: always
+    volumes:
+      - ./../:/var/www/html/
+    depends_on:
+      - postgres
+    networks:
+      - network1
+      
+  postgres:
+    image: postgres:12
+    build:
+      context: ./../
+      dockerfile: infrastructure/postgres/Dockerfile
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGDATA: /var/lib/postgresql/data
+    networks:
+      - network1
+      
+  node:
+    restart: always
+    build:
+      context: ./../
+      dockerfile: infrastructure/node/Dockerfile
+    volumes:
+      - ./../:/var/www/html/
+    networks:
+      - network1
+      
+volumes:
+  pgdata:
+    driver: local
+      
+networks:
+  network1:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.19.0.1/24
+      
+

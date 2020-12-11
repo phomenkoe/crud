@@ -21,3 +21,9 @@ cp .env.example .env
 ```
 docker-compose -f infrastructure/docker-compose.yml up --build
 ```
+
+5. Enter into the browser
+
+```
+http://localhost:8081/
+```
